@@ -8,5 +8,7 @@ namespace AthenasAcademy.GeradorCertificado.Dominio.Responses
 {
     public class CertificadoResponse
     {
+        public string CertificadoPDF { get; set; }
+        public string CertificadoPNG { get; set; }
     }
 }
