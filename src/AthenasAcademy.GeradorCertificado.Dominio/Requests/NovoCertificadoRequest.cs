@@ -14,6 +14,8 @@ namespace AthenasAcademy.GeradorCertificado.Dominio.Requests
 
         public int Aproveitamento { get; set; }
 
+        public DateTime DataConclusao { get; set; }
+
         public string NomeCurso { get; set; }
 
         public int CodigoCurso { get; set; }
