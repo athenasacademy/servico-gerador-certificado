@@ -12,10 +12,8 @@ namespace AthenasAcademy.GeradorCertificado.Dominio.Requests
 
         public int Matricula { get; set; }
 
-        public int Aproveitamento { get; set; }
-
         public string NomeCurso { get; set; }
 
-        public int CargaHoraria { get; set; }
+        public int CodigoCurso{ get; set; }
     }
 }
