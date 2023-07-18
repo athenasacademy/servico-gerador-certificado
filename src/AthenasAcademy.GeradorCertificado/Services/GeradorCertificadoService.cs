@@ -10,7 +10,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
@@ -188,7 +189,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
             return sb.ToString();
         }
 
-        private string RecuperarCaminhoArquivo(string nomeArquivoPNG) => Path.Combine(Path.Combine(Path.GetTempPath(), CAMINHO_BASE_ARQUIVO), nomeArquivoPNG);
+        private string RecuperarCaminhoArquivo(string nomeArquivo) => Path.Combine(Path.Combine(Path.GetTempPath(), CAMINHO_BASE_ARQUIVO), nomeArquivo);
 
         private string RecuperarCaminhoArquivoModelo() => Path.Combine(Path.GetTempPath(), CAMINHO_BASE_ARQUIVO_MODELO.Replace(':', Path.DirectorySeparatorChar));
 
@@ -200,6 +201,10 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 return stream.ToArray();
             }
         }
+
+        private string ConverterParaBase64(string caminhoArquivo) => Convert.ToBase64String(File.ReadAllBytes(caminhoArquivo));
+
+        private string ObterTamanhoArquivo(string caminhoArquivo) => new FileInfo(caminhoArquivo).Length.ToString();
 
         private QrCodeDetalhesModel GerarQRCode(string nomeArquivoQRCode, int matricula, int codigoCurso)
         {
@@ -260,16 +265,49 @@ namespace AthenasAcademy.GeradorCertificado.Services
                             PNGBase64 = Convert.ToBase64String(bytesImagem),
                             NomeArquivo = Path.GetFileName(caminhoArquivo),
                             CaminhoArquivo = caminhoArquivo,
-                            TamanhoArquivo = new FileInfo(caminhoArquivo).Length.ToString()
+                            TamanhoArquivo = ObterTamanhoArquivo(caminhoArquivo)
                         };
                     }
                 }
             }
         }
 
-        private PDFDetalhesModel GerarPDF(string nomeArquivoPDF, string caminhoArquivo)
+        private PDFDetalhesModel GerarPDF(string nomeArquivoPDF, string caminhoArquivoPng)
         {
-            throw new NotImplementedException();
+            string caminhoArquivoPdf = RecuperarCaminhoArquivo(nomeArquivoPDF);
+
+            System.Drawing.Image imagem = System.Drawing.Image.FromFile(caminhoArquivoPng);
+
+            using (PdfDocument document = new PdfDocument())
+            {
+                try
+                {
+                    PdfPage page = document.AddPage();
+                    page.Width = XUnit.FromPoint(imagem.Width);
+                    page.Height = XUnit.FromPoint(imagem.Height);
+
+                    XGraphics gfx = XGraphics.FromPdfPage(page);
+                    XImage image = XImage.FromFile(caminhoArquivoPng);
+
+                    double x = (page.Width - imagem.Width) / 2;
+                    double y = (page.Height - imagem.Height) / 2;
+
+                    gfx.DrawImage(image, x, y, imagem.Width, imagem.Height);
+                    document.Save(caminhoArquivoPdf);
+                }
+                catch (IOException ex)
+                {
+                    throw ex;
+                }
+            }
+
+            return new PDFDetalhesModel
+            {
+                PDFBase64 = ConverterParaBase64(caminhoArquivoPdf),
+                NomeArquivo = Path.GetFileName(caminhoArquivoPdf),
+                CaminhoArquivo = caminhoArquivoPdf,
+                TamanhoArquivo = ObterTamanhoArquivo(caminhoArquivoPdf)
+            };
         }
         #endregion
     }
