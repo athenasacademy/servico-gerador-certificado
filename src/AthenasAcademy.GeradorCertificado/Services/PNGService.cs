@@ -4,6 +4,9 @@ using System;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.IO;
+using AthenasAcademy.GeradorCertificado.Repositories;
+using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
+using System.Threading.Tasks;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
@@ -21,10 +24,15 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 return instancia;
             }
         }
-
-        public PNGDetalhesModel GerarPNG(string nomeArquivoPNG, string caminhoArquivoQrCode, string textoCertificado, string caminhoArquivo, string caminhoArquivoModelo)
+        
+        public async Task<PNGDetalhesModel> GerarPNG(string nomeArquivoPNG, string caminhoArquivoQrCode, string textoCertificado, string caminhoArquivo, string caminhoArquivoModelo, bool armazenarNoBucket = true)
         {
-            return Gerar(nomeArquivoPNG, caminhoArquivoQrCode, textoCertificado, caminhoArquivo, caminhoArquivoModelo);
+            PNGDetalhesModel png = Gerar(nomeArquivoPNG, caminhoArquivoQrCode, textoCertificado, caminhoArquivo, caminhoArquivoModelo);
+
+            if (armazenarNoBucket)
+                await AwsS3Repository.Instancia.EnviarPNGAsync(png, "certificados/PNG");
+
+            return png;
         }
 
         private PNGDetalhesModel Gerar(string nomeArquivoPNG, string caminhoArquivoQrCode, string textoCertificado, string caminhoArquivo, string caminhoArquivoModelo)

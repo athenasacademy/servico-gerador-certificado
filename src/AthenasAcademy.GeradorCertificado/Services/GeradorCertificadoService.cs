@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
 using System.Web;
+using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
+using AthenasAcademy.GeradorCertificado.Repositories;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
@@ -20,6 +22,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
         private IGerenciadorArquivosService gerenciadorArquivosService = GerenciadorArquivosService.Instancia;
         private IQRCodeService qrCodeService = QRCodeService.Instancia;
         private IPNGService pngService = PNGService.Instancia;
+        private IAwsS3Repository awsS3Repository = AwsS3Repository.Instancia;
         #endregion
 
         #region Contrutores
@@ -55,29 +58,22 @@ namespace AthenasAcademy.GeradorCertificado.Services
             QrCodeDetalhesModel qrCodeDetalhesModel = qrCodeService.GerarQRCode(
                 nomeArquivoQRCode, request.Matricula, request.CodigoCurso, gerenciadorArquivosService.RecuperarCaminhoBase());
             
-            PNGDetalhesModel pngDetalhesModel = pngService.GerarPNG(
-                nomeArquivoPNG, qrCodeDetalhesModel.CaminhoArquivo, textoCertificado, 
-                gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPNG, exception: false), gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
-            
+            PNGDetalhesModel pngDetalhesModel = await pngService.GerarPNG(
+                nomeArquivoPNG, 
+                qrCodeDetalhesModel.CaminhoArquivo, 
+                textoCertificado, 
+                gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPNG, exception: false),
+                gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
+
             PDFDetalhesModel pdfDetalhesModel = GerarPDF(nomeArquivoPDF, pngDetalhesModel.CaminhoArquivo);
 
-            GerarNovoCertificadoModel novoCertificado = new GerarNovoCertificadoModel()
+            return new NovoCertificadoPDFResponse()
             {
-                QrCode = qrCodeDetalhesModel,
-                PNG = pngDetalhesModel,
-                PDF = pdfDetalhesModel,
+                NomeArquivo = pdfDetalhesModel.NomeArquivo,
+                CaminhoArquivo = await awsS3Repository.EnviarPDFAsync(pdfDetalhesModel, "certificados/PDF"),
+                PDFArquivo = await gerenciadorArquivosService.RecuperarBytesArquivoAsync(pdfDetalhesModel.CaminhoArquivo),
+                UriDownload = await awsS3Repository.GerarURIAsync(pdfDetalhesModel.NomeArquivo, "certificados/PDF")
             };
-
-            var teste = await Task.FromResult(
-                new NovoCertificadoPDFResponse()
-                {
-                    Arquivo = novoCertificado.PDF.NomeArquivo,
-                    CertificadoPDF = novoCertificado.PDF.CaminhoArquivo,
-                    CertificadoBytes = await gerenciadorArquivosService.RecuperarBytesArquivoAsync(novoCertificado.PDF.CaminhoArquivo),
-                    CertificadoBase64 = novoCertificado.PDF.PDFBase64
-                });
-
-            return teste;
         }
         #endregion
 

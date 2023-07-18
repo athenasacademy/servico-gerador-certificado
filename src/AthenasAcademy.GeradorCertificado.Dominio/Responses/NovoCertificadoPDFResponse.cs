@@ -8,12 +8,12 @@ namespace AthenasAcademy.GeradorCertificado.Dominio.Responses
 {
     public class NovoCertificadoPDFResponse
     {
-        public string Arquivo { get; set; }
+        public string NomeArquivo { get; set; }
 
-        public string CertificadoPDF { get; set; }
+        public string CaminhoArquivo { get; set; }
 
-        public string CertificadoBase64 { get; set; }
+        public byte[] PDFArquivo { get; set; }
 
-        public byte[] CertificadoBytes { get; set; }
+        public string UriDownload { get; set; }
     }
 }
