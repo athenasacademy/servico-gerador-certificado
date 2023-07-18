@@ -12,11 +12,14 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
 {
     public class AwsS3Repository : IAwsS3Repository
     {
+        #region Dependencias
         private const string ACCESS_KEY = "AKIAS2MQFVFOCOZNQYVH";
         private const string SECRET_KEY = "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";
         private const string BUCKET_BASE = "academy-academy";
         private static AwsS3Repository instancia;
-        
+        #endregion
+
+        #region Construtores
         public static AwsS3Repository Instancia
         {
             get
@@ -27,7 +30,9 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
                 return instancia;
             }
         }
+        #endregion
 
+        #region Métodos Públicos
         public async Task<string> EnviarPDFAsync(PDFDetalhesModel pdfDetalhes, string bucket)
         {
             using (AmazonS3Client client = GetClient())
@@ -93,7 +98,9 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
                 throw new Exception($"Erro geral: {ex.Message}");
             }
         }
+        #endregion
 
+        #region Métodos Privados
         private AmazonS3Client GetClient()
         {
             BasicAWSCredentials credentials = new BasicAWSCredentials(ACCESS_KEY, SECRET_KEY);
@@ -105,5 +112,6 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
 
             return new AmazonS3Client(credentials, config);
         }
+        #endregion
     }
 }

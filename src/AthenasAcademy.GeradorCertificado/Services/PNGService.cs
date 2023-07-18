@@ -5,13 +5,13 @@ using System.Drawing.Imaging;
 using System.Drawing;
 using System.IO;
 using AthenasAcademy.GeradorCertificado.Repositories;
-using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
 using System.Threading.Tasks;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
     public class PNGService : IPNGService
     {
+        #region Construtores
         private static PNGService instancia;
 
         public static PNGService Instancia
@@ -24,7 +24,9 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 return instancia;
             }
         }
-        
+        #endregion
+
+        #region Métodos Públicos
         public async Task<PNGDetalhesModel> GerarPNG(string nomeArquivoPNG, string caminhoArquivoQrCode, string textoCertificado, string caminhoArquivo, string caminhoArquivoModelo, bool armazenarNoBucket = true)
         {
             PNGDetalhesModel png = Gerar(nomeArquivoPNG, caminhoArquivoQrCode, textoCertificado, caminhoArquivo, caminhoArquivoModelo);
@@ -34,7 +36,9 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
             return png;
         }
+        #endregion
 
+        #region Métodos Privados
         private PNGDetalhesModel Gerar(string nomeArquivoPNG, string caminhoArquivoQrCode, string textoCertificado, string caminhoArquivo, string caminhoArquivoModelo)
         {
             using (Bitmap originalImagem = new Bitmap(caminhoArquivoModelo))
@@ -87,5 +91,6 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 }
             }
         }
+        #endregion
     }
 }

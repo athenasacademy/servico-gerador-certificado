@@ -10,10 +10,13 @@ namespace AthenasAcademy.GeradorCertificado.Services
 {
     public class GerenciadorArquivosService : IGerenciadorArquivosService
     {
+        #region Dependencias
         private string CAMINHO_BASE_ARQUIVO = HttpContext.Current.Server.MapPath("~/Files/");
         private string CAMINHO_BASE_ARQUIVO_MODELO = HttpContext.Current.Server.MapPath("~/Files/Model/") + "ATHENASACADEMY_horizontal_v2.png";
         private static GerenciadorArquivosService instancia;
+        #endregion
 
+        #region Construtores
         public static GerenciadorArquivosService Instancia
         {
             get {
@@ -23,7 +26,9 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 return instancia; 
             }
         }
+        #endregion
 
+        #region Métodos Públicos
         public void LimparCaminhoBase()
         {
             string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
@@ -107,4 +112,5 @@ namespace AthenasAcademy.GeradorCertificado.Services
             }
         }
     }
+    #endregion
 }

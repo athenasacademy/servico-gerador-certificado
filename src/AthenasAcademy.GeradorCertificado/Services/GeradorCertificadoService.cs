@@ -44,7 +44,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
         }
         #endregion
 
-        #region Métodos públicos
+        #region Métodos Públicos
         public async Task<NovoCertificadoPDFResponse> GerarCertificadoPDF (NovoCertificadoRequest request)
         {
             gerenciadorArquivosService.LimparCaminhoBase();

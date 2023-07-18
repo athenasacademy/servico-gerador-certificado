@@ -11,7 +11,7 @@ namespace AthenasAcademy.GeradorCertificado.Repositories.Interfaces
     {
         Task<string> EnviarPDFAsync(PDFDetalhesModel pdfDetalhes, string bucket);
 
-        Task<string> EnviarPNGAsync(PNGDetalhesModel pdfDetalhes, string bucket)
+        Task<string> EnviarPNGAsync(PNGDetalhesModel pdfDetalhes, string bucket);
 
         Task<string> GerarURIAsync(string objeto, string bucket);
     }
