@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using PdfSharp.Pdf;
 using PdfSharp.Drawing;
+using System.Web;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
@@ -56,7 +57,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
             
             PNGDetalhesModel pngDetalhesModel = pngService.GerarPNG(
                 nomeArquivoPNG, qrCodeDetalhesModel.CaminhoArquivo, textoCertificado, 
-                gerenciadorArquivosService.RecuperarCaminhoArquivo(nomeArquivoPNG, exception: false), gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
+                gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPNG, exception: false), gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
             
             PDFDetalhesModel pdfDetalhesModel = GerarPDF(nomeArquivoPDF, pngDetalhesModel.CaminhoArquivo);
 
@@ -67,21 +68,23 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 PDF = pdfDetalhesModel,
             };
 
-            return await Task.FromResult(
+            var teste = await Task.FromResult(
                 new NovoCertificadoPDFResponse()
                 {
                     Arquivo = novoCertificado.PDF.NomeArquivo,
                     CertificadoPDF = novoCertificado.PDF.CaminhoArquivo,
-                    CertificadoBytes = File.ReadAllBytes(novoCertificado.PDF.CaminhoArquivo),
+                    CertificadoBytes = await gerenciadorArquivosService.RecuperarBytesArquivoAsync(novoCertificado.PDF.CaminhoArquivo),
                     CertificadoBase64 = novoCertificado.PDF.PDFBase64
                 });
+
+            return teste;
         }
         #endregion
 
         #region Métodos Privados
         private PDFDetalhesModel GerarPDF(string nomeArquivoPDF, string caminhoArquivoPng)
         {
-            string caminhoArquivoPdf = gerenciadorArquivosService.RecuperarCaminhoArquivo(nomeArquivoPDF, exception: false);
+            string caminhoArquivoPdf = gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPDF, exception: false);
 
             System.Drawing.Image imagem = System.Drawing.Image.FromFile(caminhoArquivoPng);
 

@@ -19,10 +19,12 @@ namespace AthenasAcademy.GeradorCertificado.Services.Interfaces
 
         string RecuperarCaminhoArquivoModelo();
 
-        string RecuperarCaminhoArquivo(string nomeArquivo, bool exception);
+        string GerarCaminhoArquivo(string nomeArquivo, bool exception);
 
         string RecuperarCaminhoBase();
 
         string ConverterParaBase64(string caminhoArquivo);
+
+        Task<byte[]> RecuperarBytesArquivoAsync(string caminhoArquivo);
     }
 }

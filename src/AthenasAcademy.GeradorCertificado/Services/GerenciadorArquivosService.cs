@@ -3,13 +3,15 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
+using System.Web;
 
 namespace AthenasAcademy.GeradorCertificado.Services
 {
     public class GerenciadorArquivosService : IGerenciadorArquivosService
     {
-        private const string CAMINHO_BASE_ARQUIVO = "certificado";
-        private const string CAMINHO_BASE_ARQUIVO_MODELO = "certificado:modelo:ATHENASACADEMY_horizontal_v2.png";
+        private string CAMINHO_BASE_ARQUIVO = HttpContext.Current.Server.MapPath("~/Files/");
+        private string CAMINHO_BASE_ARQUIVO_MODELO = HttpContext.Current.Server.MapPath("~/Files/Model/") + "ATHENASACADEMY_horizontal_v2.png";
         private static GerenciadorArquivosService instancia;
 
         public static GerenciadorArquivosService Instancia
@@ -51,22 +53,16 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
         public string RecuperarCaminhoBase()
         {
-            string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
-            string caminhoBase = Path.Combine(caminhoSrc, CAMINHO_BASE_ARQUIVO);
-
-            if (Directory.Exists(caminhoBase))
-                return caminhoBase;
+            if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
+                return CAMINHO_BASE_ARQUIVO;
 
             throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
         }
 
-        public string RecuperarCaminhoArquivo(string nomeArquivo, bool exception)
+        public string GerarCaminhoArquivo(string nomeArquivo, bool exception)
         {
-            string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
-            string caminhoBase = Path.Combine(caminhoSrc, CAMINHO_BASE_ARQUIVO);
-
-            if (Directory.Exists(caminhoBase))
-                return Path.Combine(caminhoBase, nomeArquivo);
+            if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
+                return Path.Combine(CAMINHO_BASE_ARQUIVO, nomeArquivo);
 
             if (exception)
                 throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
@@ -76,11 +72,8 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
         public string RecuperarCaminhoArquivoModelo()
         {
-            string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
-            string caminhoBase = Path.Combine(caminhoSrc, CAMINHO_BASE_ARQUIVO_MODELO.Replace(':', Path.DirectorySeparatorChar));
-
-            if (File.Exists(caminhoBase))
-                return caminhoBase;
+            if (File.Exists(CAMINHO_BASE_ARQUIVO_MODELO))
+                return CAMINHO_BASE_ARQUIVO_MODELO;
 
             throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO_MODELO));
         }
@@ -96,5 +89,22 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
         public string ConverterParaBase64(string caminhoArquivo) => Convert.ToBase64String(File.ReadAllBytes(caminhoArquivo));
 
+        public async Task<byte[]> RecuperarBytesArquivoAsync(string caminhoArquivo)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(caminhoArquivo, FileMode.Open, FileAccess.Read))
+                {
+                    byte[] conteudoArquivo = new byte[fileStream.Length];
+                    await fileStream.ReadAsync(conteudoArquivo, 0, (int)fileStream.Length);
+                    return conteudoArquivo;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Erro ao ler o arquivo de forma assíncrona: " + ex.Message);
+                return null;
+            }
+        }
     }
 }
