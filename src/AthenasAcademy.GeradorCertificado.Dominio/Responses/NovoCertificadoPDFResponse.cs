@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace AthenasAcademy.GeradorCertificado.Dominio.Responses
 {
-    public class NovoCertificadoResponse
+    public class NovoCertificadoPDFResponse
     {
-        public int Matricula { get; set; }
-
-        public int CodigoCurso { get; set; }
+        public string Arquivo { get; set; }
 
         public string CertificadoPDF { get; set; }
-        
-        public string CertificadoPNG { get; set; }
+
+        public string CertificadoBase64 { get; set; }
+
+        public byte[] CertificadoBytes { get; set; }
     }
 }

@@ -10,7 +10,6 @@ namespace AthenasAcademy.GeradorCertificado.Services.Interfaces
 {
     public interface IGeradorCertificadoService
     {
-        Task<CertificadoResponse> ObterCertificado(CertificadoRequest request);
-        Task<NovoCertificadoResponse> GerarCertificado(NovoCertificadoRequest request);
+        Task<NovoCertificadoPDFResponse> GerarCertificadoPDF (NovoCertificadoRequest request);
     }
 }

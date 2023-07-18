@@ -15,16 +15,11 @@ namespace AthenasAcademy.GeradorCertificado.API.Controllers
             _certificadoService = GeradorCertificadoService.Instancia;
         }
 
-        [HttpGet]
-        public async Task<IHttpActionResult> Recuperar([FromBody] CertificadoRequest request) 
-        {
-            return Ok(await _certificadoService.ObterCertificado(request));
-        }
-
         [HttpPost]
+        [Route("gerar-certificado")]
         public async Task<IHttpActionResult> Gerar([FromBody] NovoCertificadoRequest request)
         {
-            return Ok(await _certificadoService.GerarCertificado(request));
+            return Ok(await _certificadoService.GerarCertificadoPDF(request));
         }
     }
 }

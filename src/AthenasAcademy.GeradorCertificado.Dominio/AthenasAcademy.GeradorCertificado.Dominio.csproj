@@ -45,7 +45,7 @@
     <Compile Include="Requests\CertificadoRequest.cs" />
     <Compile Include="Requests\NovoCertificadoRequest.cs" />
     <Compile Include="Responses\CertificadoResponse.cs" />
-    <Compile Include="Responses\NovoCertificadoResponse.cs" />
+    <Compile Include="Responses\NovoCertificadoPDFResponse.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
