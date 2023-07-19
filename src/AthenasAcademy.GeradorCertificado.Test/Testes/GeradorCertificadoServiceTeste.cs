@@ -11,9 +11,11 @@ using Xunit;
 
 namespace AthenasAcademy.GeradorCertificado.Test.Testes
 {
+    [TestClass]
     public class GeradorCertificadoServiceTeste
     {
-        [Fact]
+        //[Fact]
+        [TestMethod]
         public async Task DeveGerarPDF()
         {
             // Arange
@@ -24,34 +26,45 @@ namespace AthenasAcademy.GeradorCertificado.Test.Testes
                                                 .ComEnviarPDFAsyncOK()
                                                 .ComRecuperarBytesArquivoAsyncOK()
                                                 .ComGerarURIAsyncOK()
+                                                .ComRecuperarCaminhoBaseOK()
+                                                .ComObterTamanhoArquivoOK()
+                                                .ComGerarCaminhoArquivoOK()
                                                 .InstanciarServico();
 
             // Act
             NovoCertificadoRequest request = fixture.NovoCertificadoRequestMOCK();
             NovoCertificadoPDFResponse response = await service.GerarCertificadoPDF(request);
 
-            IEnumerable<ICall> callsArquivoService = fixture.GetGerenciadorArquivosServiceCalls()
-                .Where(x => 
-                       x.GetMethodInfo().Name == "LimparCaminhoBase" && 
-                       x.GetMethodInfo().Name == "RecuperarBytesArquivoAsync");
 
             IEnumerable<ICall> callsQRCodeService = fixture.GetQRCodeServiceCalls()
                 .Where(x => x.GetMethodInfo().Name == "GerarQRCode");
 
             IEnumerable<ICall> callsPNGService = fixture.GetPNGServiceCalls()
-                .Where(x => x.GetMethodInfo().Name == "TryGetValue");
+                .Where(x => x.GetMethodInfo().Name == "GerarPNG");
 
-            IEnumerable<ICall> callsAwsS3Repository = fixture.GetAwsS3RepositoryCalls()
-                .Where(x => 
-                       x.GetMethodInfo().Name == "EnviarPDFAsync" &&
-                       x.GetMethodInfo().Name == "GerarURIAsync");
+            bool callsNecessariosEmAwsS3Repository = fixture.GetAwsS3RepositoryCalls().Select(x => x.GetMethodInfo().Name)
+                .All(name =>
+                    name == "EnviarPDFAsync" ||
+                    name == "GerarURIAsync");
+
+            bool callsNecessariosEmArquivoService = fixture.GetGerenciadorArquivosServiceCalls()
+                .Select(x => x.GetMethodInfo().Name)
+                .All(name =>
+                    name == "LimparCaminhoBase" ||
+                    name == "RecuperarCaminhoBase" ||
+                    name == "GerarCaminhoArquivo" ||
+                    name == "RecuperarCaminhoArquivoModelo" ||
+                    name == "GerarCaminhoArquivo" ||
+                    name == "ConverterParaBase64" ||
+                    name == "ObterTamanhoArquivo" ||
+                    name == "RecuperarBytesArquivoAsync");
 
             // Assert
-            Assert.Equals(2, callsArquivoService.Count());
-            Assert.Equals(1, callsQRCodeService.Count());
-            Assert.Equals(1, callsPNGService.Count());
-            Assert.Equals(2, callsAwsS3Repository.Count());
-            Assert.IsNotNull(response);
+            Assert.IsTrue(callsNecessariosEmArquivoService);
+            Assert.IsTrue(callsNecessariosEmAwsS3Repository);
+            Assert.AreEqual(1, callsQRCodeService.Count());
+            Assert.AreEqual(1, callsPNGService.Count());
+            Assert.AreNotEqual(null, response);
         }
     }
 }

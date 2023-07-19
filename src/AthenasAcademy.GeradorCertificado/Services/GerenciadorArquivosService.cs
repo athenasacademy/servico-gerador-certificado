@@ -11,8 +11,8 @@ namespace AthenasAcademy.GeradorCertificado.Services
     public class GerenciadorArquivosService : IGerenciadorArquivosService
     {
         #region Dependencias
-        private string CAMINHO_BASE_ARQUIVO = HttpContext.Current.Server.MapPath("~/Files/");
-        private string CAMINHO_BASE_ARQUIVO_MODELO = HttpContext.Current.Server.MapPath("~/Files/Model/") + "ATHENASACADEMY_horizontal_v2.png";
+        private string CAMINHO_BASE_ARQUIVO;
+        private string CAMINHO_BASE_ARQUIVO_MODELO;
         private static GerenciadorArquivosService instancia;
         #endregion
 
@@ -22,10 +22,18 @@ namespace AthenasAcademy.GeradorCertificado.Services
             get
             {
                 if (instancia is null)
-                    instancia = new GerenciadorArquivosService();
+                    instancia = new GerenciadorArquivosService(
+                        HttpContext.Current.Server.MapPath("~/Files/"),
+                        HttpContext.Current.Server.MapPath("~/Files/Model/") + "ATHENASACADEMY_horizontal_v2.png");
 
                 return instancia;
             }
+        }
+
+        public GerenciadorArquivosService(string caminhoBaseArquivo, string caminhoBaseArquivoModelo)
+        {
+            CAMINHO_BASE_ARQUIVO = caminhoBaseArquivo;
+            CAMINHO_BASE_ARQUIVO_MODELO = caminhoBaseArquivoModelo;
         }
         #endregion
 

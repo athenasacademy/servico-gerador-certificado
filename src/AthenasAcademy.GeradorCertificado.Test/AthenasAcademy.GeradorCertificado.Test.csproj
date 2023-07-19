@@ -77,6 +77,7 @@
     <Compile Include="Testes\GeradorCertificadoServiceTeste.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Files\CERTIFICADO_TESTE_0000000003.pdf" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +92,9 @@
       <Project>{e4287c23-59be-41cb-b662-af221ef7966a}</Project>
       <Name>AthenasAcademy.GeradorCertificado</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Files\CERTIFICADO_TESTE_0000000003.png" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

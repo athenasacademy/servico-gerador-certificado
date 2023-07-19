@@ -19,10 +19,10 @@ namespace AthenasAcademy.GeradorCertificado.Services
     public class GeradorCertificadoService : IGeradorCertificadoService
     {
         #region Dependencias
-        private IGerenciadorArquivosService gerenciadorArquivosService = GerenciadorArquivosService.Instancia;
-        private IQRCodeService qrCodeService = QRCodeService.Instancia;
-        private IPNGService pngService = PNGService.Instancia;
-        private IAwsS3Repository awsS3Repository = AwsS3Repository.Instancia;
+        private IGerenciadorArquivosService gerenciadorArquivosService;
+        private IQRCodeService qrCodeService;
+        private IPNGService pngService;
+        private IAwsS3Repository awsS3Repository;
         #endregion
 
         #region Contrutores
@@ -32,15 +32,27 @@ namespace AthenasAcademy.GeradorCertificado.Services
         {
             get {
                 if (instancia is null)
-                    instancia = new GeradorCertificadoService();
+                    instancia = new GeradorCertificadoService(
+                        GerenciadorArquivosService.Instancia,
+                        QRCodeService.Instancia,
+                        PNGService.Instancia,
+                        AwsS3Repository.Instancia);
 
                 return instancia; 
             }
         }
 
-        private GeradorCertificadoService()
+        public GeradorCertificadoService(
+            IGerenciadorArquivosService _gerenciadorArquivosService,
+            IQRCodeService _qrCodeService,
+            IPNGService _pngService,
+            IAwsS3Repository _awsS3Repository
+            )
         {
-
+            gerenciadorArquivosService = _gerenciadorArquivosService;
+            qrCodeService = _qrCodeService;
+            pngService = _pngService;
+            awsS3Repository = _awsS3Repository;
         }
         #endregion
 
