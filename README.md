@@ -8,8 +8,7 @@ O sistema tem uma interface intuitiva que permite o gerenciamento fácil dos mod
 ## Badges: 
 ## Exemplos e Screenshots: 
 ## Requisitos do Sistema: 
-  em .NET Framework 4.8
-  O objetivo deste épico é desenvolver um sistema de Gerador de Certificados utilizando a versão 4.8 do .NET Framework.
+Sistema de Gerador de Certificados utiliza a versão 4.8 do .NET Framework.
 
 
 
