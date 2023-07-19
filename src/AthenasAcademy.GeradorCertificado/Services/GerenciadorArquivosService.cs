@@ -19,11 +19,12 @@ namespace AthenasAcademy.GeradorCertificado.Services
         #region Construtores
         public static GerenciadorArquivosService Instancia
         {
-            get {
+            get
+            {
                 if (instancia is null)
                     instancia = new GerenciadorArquivosService();
 
-                return instancia; 
+                return instancia;
             }
         }
         #endregion
@@ -31,68 +32,130 @@ namespace AthenasAcademy.GeradorCertificado.Services
         #region Métodos Públicos
         public void LimparCaminhoBase()
         {
-            string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
-            string caminhoBase = Path.Combine(caminhoSrc, CAMINHO_BASE_ARQUIVO);
-
-            string[] arquivos = Directory.GetFiles(caminhoBase);
-
-            foreach (string arquivo in arquivos)
+            try
             {
-                File.Delete(arquivo);
+                string caminhoSrc = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\"));
+                string caminhoBase = Path.Combine(caminhoSrc, CAMINHO_BASE_ARQUIVO);
+
+                string[] arquivos = Directory.GetFiles(caminhoBase);
+
+                foreach (string arquivo in arquivos)
+                {
+                    File.Delete(arquivo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao limpar o caminho base: " + ex.Message, ex);
             }
         }
 
         public void LimparCaminhoBase(string[] caminhosArquivos)
         {
-            if (caminhosArquivos == null || caminhosArquivos.Length == 0)
-                return;
-
-            foreach (var arquivo in caminhosArquivos)
+            try
             {
-                if (File.Exists(arquivo))
-                    File.Delete(arquivo);
+                if (caminhosArquivos == null || caminhosArquivos.Length == 0)
+                    return;
+
+                foreach (var arquivo in caminhosArquivos)
+                {
+                    if (File.Exists(arquivo))
+                        File.Delete(arquivo);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao limpar o caminho base: " + ex.Message, ex);
             }
         }
 
-        public string ObterTamanhoArquivo(string caminhoArquivo) => new FileInfo(caminhoArquivo).Length.ToString();
+        public string ObterTamanhoArquivo(string caminhoArquivo)
+        {
+            try
+            {
+                return new FileInfo(caminhoArquivo).Length.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao obter o tamanho do arquivo: " + ex.Message, ex);
+            }
+        }
 
         public string RecuperarCaminhoBase()
         {
-            if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
-                return CAMINHO_BASE_ARQUIVO;
+            try
+            {
+                if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
+                    return CAMINHO_BASE_ARQUIVO;
 
-            throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
+                throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao recuperar o caminho base: " + ex.Message, ex);
+            }
         }
 
         public string GerarCaminhoArquivo(string nomeArquivo, bool exception)
         {
-            if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
-                return Path.Combine(CAMINHO_BASE_ARQUIVO, nomeArquivo);
+            try
+            {
+                if (Directory.Exists(CAMINHO_BASE_ARQUIVO))
+                    return Path.Combine(CAMINHO_BASE_ARQUIVO, nomeArquivo);
 
-            if (exception)
-                throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
+                if (exception)
+                    throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO));
 
-            return string.Empty;
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao gerar o caminho do arquivo: " + ex.Message, ex);
+            }
         }
 
         public string RecuperarCaminhoArquivoModelo()
         {
-            if (File.Exists(CAMINHO_BASE_ARQUIVO_MODELO))
-                return CAMINHO_BASE_ARQUIVO_MODELO;
+            try
+            {
+                if (File.Exists(CAMINHO_BASE_ARQUIVO_MODELO))
+                    return CAMINHO_BASE_ARQUIVO_MODELO;
 
-            throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO_MODELO));
+                throw new IOException(string.Format("Dados base para emissão do certificado não foram encontrados na convensão '{0}'", CAMINHO_BASE_ARQUIVO_MODELO));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao recuperar o caminho do arquivo modelo: " + ex.Message, ex);
+            }
         }
 
         public byte[] RecuperarBytesDaImagem(Bitmap bitmap)
         {
-            using (MemoryStream stream = new MemoryStream())
+            try
             {
-                bitmap.Save(stream, ImageFormat.Png);
-                return stream.ToArray();
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    bitmap.Save(stream, ImageFormat.Png);
+                    return stream.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao recuperar os bytes da imagem: " + ex.Message, ex);
             }
         }
 
-        public string ConverterParaBase64(string caminhoArquivo) => Convert.ToBase64String(File.ReadAllBytes(caminhoArquivo));
+        public string ConverterParaBase64(string caminhoArquivo)
+        {
+            try
+            {
+                return Convert.ToBase64String(File.ReadAllBytes(caminhoArquivo));
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao converter o arquivo para Base64: " + ex.Message, ex);
+            }
+        }
 
         public async Task<byte[]> RecuperarBytesArquivoAsync(string caminhoArquivo)
         {
@@ -107,10 +170,9 @@ namespace AthenasAcademy.GeradorCertificado.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Erro ao ler o arquivo de forma assíncrona: " + ex.Message);
-                return null;
+                throw new Exception("Erro ao ler o arquivo de forma assíncrona: " + ex.Message, ex);
             }
         }
+        #endregion
     }
-    #endregion
 }

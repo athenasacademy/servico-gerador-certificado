@@ -45,35 +45,46 @@ namespace AthenasAcademy.GeradorCertificado.Services
         #endregion
 
         #region Métodos Públicos
-        public async Task<NovoCertificadoPDFResponse> GerarCertificadoPDF (NovoCertificadoRequest request)
+        public async Task<NovoCertificadoPDFResponse> GerarCertificadoPDF(NovoCertificadoRequest request)
         {
-            gerenciadorArquivosService.LimparCaminhoBase();
-
-            string nomeArquivoPNG = "CERTIFICADO_" + request.Matricula.ToString("D10") + ".png";
-            string nomeArquivoQRCode = "QRCODE_" + request.Matricula.ToString("D10") + ".png";
-            string nomeArquivoPDF = "CERTIFICADO_" + request.Matricula.ToString("D10") + ".pdf";
-
-            string textoCertificado = GerarTexto(request);
-
-            QrCodeDetalhesModel qrCodeDetalhesModel = qrCodeService.GerarQRCode(
-                nomeArquivoQRCode, request.Matricula, request.CodigoCurso, gerenciadorArquivosService.RecuperarCaminhoBase());
-            
-            PNGDetalhesModel pngDetalhesModel = await pngService.GerarPNG(
-                nomeArquivoPNG, 
-                qrCodeDetalhesModel.CaminhoArquivo, 
-                textoCertificado, 
-                gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPNG, exception: false),
-                gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
-
-            PDFDetalhesModel pdfDetalhesModel = GerarPDF(nomeArquivoPDF, pngDetalhesModel.CaminhoArquivo);
-
-            return new NovoCertificadoPDFResponse()
+            try
             {
-                NomeArquivo = pdfDetalhesModel.NomeArquivo,
-                CaminhoArquivo = await awsS3Repository.EnviarPDFAsync(pdfDetalhesModel, "certificados/PDF"),
-                PDFArquivo = await gerenciadorArquivosService.RecuperarBytesArquivoAsync(pdfDetalhesModel.CaminhoArquivo),
-                UriDownload = await awsS3Repository.GerarURIAsync(pdfDetalhesModel.NomeArquivo, "certificados/PDF")
-            };
+                gerenciadorArquivosService.LimparCaminhoBase();
+
+                string nomeArquivoPNG = "CERTIFICADO_" + request.Matricula.ToString("D10") + ".png";
+                string nomeArquivoQRCode = "QRCODE_" + request.Matricula.ToString("D10") + ".png";
+                string nomeArquivoPDF = "CERTIFICADO_" + request.Matricula.ToString("D10") + ".pdf";
+
+                string textoCertificado = GerarTexto(request);
+
+                QrCodeDetalhesModel qrCodeDetalhesModel = qrCodeService.GerarQRCode(
+                    nomeArquivoQRCode, request.Matricula, request.CodigoCurso, gerenciadorArquivosService.RecuperarCaminhoBase());
+
+                PNGDetalhesModel pngDetalhesModel = await pngService.GerarPNG(
+                    nomeArquivoPNG,
+                    qrCodeDetalhesModel.CaminhoArquivo,
+                    textoCertificado,
+                    gerenciadorArquivosService.GerarCaminhoArquivo(nomeArquivoPNG, exception: false),
+                    gerenciadorArquivosService.RecuperarCaminhoArquivoModelo());
+
+                PDFDetalhesModel pdfDetalhesModel = GerarPDF(nomeArquivoPDF, pngDetalhesModel.CaminhoArquivo);
+
+                var caminhoArquivoPDF = await awsS3Repository.EnviarPDFAsync(pdfDetalhesModel, "certificados/PDF");
+                var bytesPDF = await gerenciadorArquivosService.RecuperarBytesArquivoAsync(pdfDetalhesModel.CaminhoArquivo);
+                var uriDownload = await awsS3Repository.GerarURIAsync(pdfDetalhesModel.NomeArquivo, "certificados/PDF");
+
+                return new NovoCertificadoPDFResponse()
+                {
+                    NomeArquivo = pdfDetalhesModel.NomeArquivo,
+                    CaminhoArquivo = caminhoArquivoPDF,
+                    PDFArquivo = bytesPDF,
+                    UriDownload = uriDownload
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(string.Format("Não foi possível gerar o certificado nesse momento. {0}", ex.Message));
+            }
         }
         #endregion
 
@@ -118,95 +129,139 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
         private string FormatarDetahesAluno(string nomeAluno)
         {
-            TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-            nomeAluno = textInfo.ToTitleCase(nomeAluno.ToLower());
-
-            string[] sNomes = nomeAluno.Split(' ');
-
-            if (sNomes.Count() == 0)
-                return sNomes[0];
-
-            for (int i = 0; i < sNomes.Count(); i++)
+            try
             {
-                sNomes[i] = RemoverParticulas(sNomes[i]);
-            }
+                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
+                nomeAluno = textInfo.ToTitleCase(nomeAluno.ToLower());
 
-            for (int i = 0; i < sNomes.Count() - 1; i++)
+                string[] sNomes = nomeAluno.Split(' ');
+
+                if (sNomes.Count() == 0)
+                    return sNomes[0];
+
+                for (int i = 0; i < sNomes.Count(); i++)
+                {
+                    sNomes[i] = RemoverParticulas(sNomes[i]);
+                }
+
+                for (int i = 0; i < sNomes.Count() - 1; i++)
+                {
+                    if (i > 0)
+                        sNomes[i] = AbreviarSobrenome(sNomes[i]);
+                }
+
+                sNomes = sNomes.Where(s => !string.IsNullOrEmpty(s)).ToArray();
+
+                return string.Join(" ", sNomes);
+            }
+            catch (IndexOutOfRangeException ex)
             {
-                if (i > 0)
-                    sNomes[i] = AbreviarSobrenome(sNomes[i]);
+                throw new Exception("Erro ao formatar detalhes do aluno: A lista de nomes está vazia.", ex);
             }
-
-            sNomes = sNomes.Where(s => !string.IsNullOrEmpty(s)).ToArray();
-
-            return string.Join(" ", sNomes);
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao formatar detalhes do aluno: " + ex.Message, ex);
+            }
         }
 
         private string FormatarDetahesMatriculaAluno(int matriculaAluno)
         {
-            return string.Format("Matrícula: {0}", matriculaAluno.ToString("D8"));
+            try
+            {
+                return string.Format("Matrícula: {0}", matriculaAluno.ToString("D8"));
+            }
+            catch (FormatException ex)
+            {
+                throw new Exception("Erro ao formatar matrícula do aluno: A matrícula não é um número válido.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao formatar matrícula do aluno: " + ex.Message, ex);
+            }
         }
 
         public string RemoverParticulas(string sobrenome)
         {
-            string[] particulas = { "De", "Dos", "Da", "Das" };
-
-            foreach (string particula in particulas)
+            try
             {
-                if (sobrenome.Equals(particula, StringComparison.OrdinalIgnoreCase))
-                    sobrenome = string.Empty;
-            }
+                string[] particulas = { "De", "Dos", "Da", "Das" };
 
-            return sobrenome;
+                foreach (string particula in particulas)
+                {
+                    if (sobrenome.Equals(particula, StringComparison.OrdinalIgnoreCase))
+                        sobrenome = string.Empty;
+                }
+
+                return sobrenome;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao remover partículas do sobrenome: " + ex.Message, ex);
+            }
         }
+
 
         public string AbreviarSobrenome(string sobrenome)
         {
-            if (sobrenome.Length > 0)
-                sobrenome = $"{sobrenome[0]}.";
+            try
+            {
+                if (sobrenome.Length > 0)
+                    sobrenome = $"{sobrenome[0]}.";
 
-            return sobrenome;
+                return sobrenome;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao abreviar sobrenome: " + ex.Message, ex);
+            }
         }
+
 
         private string FormatarDetahesCurso(string nomeCurso, int codCurso, DateTime dataConclusao, int cargaHoraria)
         {
-            nomeCurso = nomeCurso.ToUpper();
-            string cargaHorariaCurso = cargaHoraria.ToString() + " horas";
-            string codigoCurso = codCurso.ToString("D6");
-
-            if (nomeCurso.Length < 25)
+            try
             {
-                return string.Format(
-                    "concluiu em {0} o curso '{1}' código: {2} com carga horária total de {3}",
-                    dataConclusao.ToString("dd/MM/yyyy"),
-                    nomeCurso,
-                    codigoCurso,
-                    cargaHorariaCurso);
+                nomeCurso = nomeCurso.ToUpper();
+                string cargaHorariaCurso = cargaHoraria.ToString() + " horas";
+                string codigoCurso = codCurso.ToString("D6");
+
+                if (nomeCurso.Length < 25)
+                {
+                    return string.Format(
+                        "concluiu em {0} o curso '{1}' código: {2} com carga horária total de {3}",
+                        dataConclusao.ToString("dd/MM/yyyy"),
+                        nomeCurso,
+                        codigoCurso,
+                        cargaHorariaCurso);
+                }
+                else if (nomeCurso.Length > 25 && nomeCurso.Length < 50)
+                {
+                    return string.Format(
+                        "concluiu em {0} o curso '{1}' código: {2}{3}{4} com carga horária total de {5}",
+                        dataConclusao.ToString("dd/MM/yyyy"),
+                        nomeCurso,
+                        codigoCurso,
+                        Environment.NewLine,
+                        Environment.NewLine,
+                        cargaHorariaCurso);
+                }
+                else
+                {
+                    return string.Format(
+                        "concluiu em {0} o curso '{1}'{2} código: {3} com carga horária total de {4}",
+                        dataConclusao.ToString("dd/MM/yyyy"),
+                        nomeCurso,
+                        Environment.NewLine,
+                        codigoCurso,
+                        cargaHorariaCurso);
+                }
             }
-
-            else if (nomeCurso.Length > 25 && nomeCurso.Length < 50)
+            catch (Exception ex)
             {
-                return string.Format(
-                    "concluiu em {0} o curso '{1}' código: {2}{3}{4} com carga horária total de {5}",
-                    dataConclusao.ToString("dd/MM/yyyy"),
-                    nomeCurso,
-                    codigoCurso,
-                    Environment.NewLine,
-                    Environment.NewLine,
-                    cargaHorariaCurso);
-            }
-
-            else
-            {
-                return string.Format(
-                    "concluiu em {0} o curso '{1}'{2} código: {3} com carga horária total de {4}",
-                    dataConclusao.ToString("dd/MM/yyyy"),
-                    nomeCurso,
-                    Environment.NewLine,
-                    codigoCurso,
-                    cargaHorariaCurso);
+                throw new Exception("Erro ao formatar detalhes do curso: " + ex.Message, ex);
             }
         }
+
 
         private string FormatarDetahesAproveitamentoCurso(int taxaAproveitamento) 
         {
@@ -215,22 +270,29 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
         private string GerarTexto(NovoCertificadoRequest request)
         {
-            string msgAluno = FormatarDetahesAluno(request.NomeAluno);
-            string msgMatricula = FormatarDetahesMatriculaAluno(request.Matricula);
-            string msgCurso = FormatarDetahesCurso(request.NomeCurso, request.CodigoCurso, request.DataConclusao, request.CargaHoraria);
-            string msgAproveitamento = FormatarDetahesAproveitamentoCurso(request.Aproveitamento);
+            try
+            {
+                string msgAluno = FormatarDetahesAluno(request.NomeAluno);
+                string msgMatricula = FormatarDetahesMatriculaAluno(request.Matricula);
+                string msgCurso = FormatarDetahesCurso(request.NomeCurso, request.CodigoCurso, request.DataConclusao, request.CargaHoraria);
+                string msgAproveitamento = FormatarDetahesAproveitamentoCurso(request.Aproveitamento);
 
-            StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(msgAluno);
-            sb.AppendLine();
-            sb.AppendLine(msgMatricula);
-            sb.AppendLine();
-            sb.AppendLine(msgCurso);
-            sb.AppendLine();
-            sb.AppendLine(msgAproveitamento);
+                sb.AppendLine(msgAluno);
+                sb.AppendLine();
+                sb.AppendLine(msgMatricula);
+                sb.AppendLine();
+                sb.AppendLine(msgCurso);
+                sb.AppendLine();
+                sb.AppendLine(msgAproveitamento);
 
-            return sb.ToString();
+                return sb.ToString();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao gerar texto do certificado: " + ex.Message, ex);
+            }
         }
         #endregion
     }

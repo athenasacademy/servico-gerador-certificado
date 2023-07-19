@@ -35,41 +35,65 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
         #region Métodos Públicos
         public async Task<string> EnviarPDFAsync(PDFDetalhesModel pdfDetalhes, string bucket)
         {
-            using (AmazonS3Client client = GetClient())
+            try
             {
-                using (TransferUtility utility = new TransferUtility(client))
+                using (AmazonS3Client client = GetClient())
                 {
-                    TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
+                    using (TransferUtility utility = new TransferUtility(client))
+                    {
+                        TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
 
-                    request.BucketName = BUCKET_BASE;
-                    request.FilePath = pdfDetalhes.CaminhoArquivo;
-                    request.Key = $"{bucket}/{pdfDetalhes.NomeArquivo}";
+                        request.BucketName = BUCKET_BASE;
+                        request.FilePath = pdfDetalhes.CaminhoArquivo;
+                        request.Key = $"{bucket}/{pdfDetalhes.NomeArquivo}";
 
-                    await utility.UploadAsync(request);
+                        await utility.UploadAsync(request);
 
-                    return  request.Key;
+                        return request.Key;
+                    }
                 }
             }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Erro ao enviar o arquivo PDF para o Amazon S3: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro geral ao enviar o arquivo PDF para o Amazon S3: {ex.Message}");
+            }
         }
+
 
         public async Task<string> EnviarPNGAsync(PNGDetalhesModel pdfDetalhes, string bucket)
         {
-            using (AmazonS3Client client = GetClient())
+            try
             {
-                using (TransferUtility utility = new TransferUtility(client))
+                using (AmazonS3Client client = GetClient())
                 {
-                    TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
+                    using (TransferUtility utility = new TransferUtility(client))
+                    {
+                        TransferUtilityUploadRequest request = new TransferUtilityUploadRequest();
 
-                    request.BucketName = BUCKET_BASE;
-                    request.FilePath = pdfDetalhes.CaminhoArquivo;
-                    request.Key = $"{bucket}/{pdfDetalhes.NomeArquivo}";
+                        request.BucketName = BUCKET_BASE;
+                        request.FilePath = pdfDetalhes.CaminhoArquivo;
+                        request.Key = $"{bucket}/{pdfDetalhes.NomeArquivo}";
 
-                    await utility.UploadAsync(request);
+                        await utility.UploadAsync(request);
 
-                    return request.Key;
+                        return request.Key;
+                    }
                 }
             }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Erro ao enviar o arquivo PNG para o Amazon S3: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro geral ao enviar o arquivo PNG para o Amazon S3: {ex.Message}");
+            }
         }
+
 
         public async Task<string> GerarURIAsync(string objeto, string bucket)
         {
@@ -95,7 +119,7 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception($"Erro geral: {ex.Message}");
+                throw new Exception($"Erro geral ao gerar a URL de download: {ex.Message}");
             }
         }
         #endregion
@@ -103,14 +127,25 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
         #region Métodos Privados
         private AmazonS3Client GetClient()
         {
-            BasicAWSCredentials credentials = new BasicAWSCredentials(ACCESS_KEY, SECRET_KEY);
-
-            AmazonS3Config config = new AmazonS3Config
+            try
             {
-                RegionEndpoint = RegionEndpoint.USWest2 // us-west-2 oregon
-            };
+                BasicAWSCredentials credentials = new BasicAWSCredentials(ACCESS_KEY, SECRET_KEY);
 
-            return new AmazonS3Client(credentials, config);
+                AmazonS3Config config = new AmazonS3Config
+                {
+                    RegionEndpoint = RegionEndpoint.USWest2 // us-west-2 oregon
+                };
+
+                return new AmazonS3Client(credentials, config);
+            }
+            catch (AmazonS3Exception ex)
+            {
+                throw new Exception($"Erro ao criar o cliente Amazon S3: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Erro geral ao criar o cliente Amazon S3: {ex.Message}");
+            }
         }
         #endregion
     }
