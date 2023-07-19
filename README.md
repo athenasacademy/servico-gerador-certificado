@@ -1,11 +1,11 @@
 # GeradorCertificado Back-end
-Neste desafio foi construído desenvolvido oo Sistema Gerador de Certificados, que será responsável por gerar certificados personalizados com base em dados específicos do usuário. 
+Neste desafio foi desenvolvido um Sistema Gerador de Certificados, que será responsável por gerar certificados personalizados com base em dados específicos do usuário. 
 ## Exemplos de Uso: 
 O sistema tem uma interface intuitiva que permite o gerenciamento fácil dos modelos de certificados, além de fornecer recursos de personalização, como logotipo, informações do evento e assinaturas.
 ## Licença: 
 ## Status do Projeto: 
 ## Como Reportar Problemas: 
-## Badges: 
+## Cobertura de teste: 
 ## Exemplos e Screenshots: 
 ## Requisitos do Sistema: 
 Sistema de Gerador de Certificados utiliza a versão 4.8 do .NET Framework.
