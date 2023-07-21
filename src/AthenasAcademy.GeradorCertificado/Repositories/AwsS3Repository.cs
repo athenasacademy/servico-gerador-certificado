@@ -161,12 +161,10 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
         #region ConfiguracaoSecrets
         private static SecretConfig ObterSecrets()
         {
-            // Carrega o arquivo YAML
             var yamlPath = HostingEnvironment.MapPath(@"~/Config/secrets.yaml");
 
             var yamlContent = File.ReadAllText(yamlPath);
 
-            // Desserializa o conteúdo YAML para a classe AppSettings
             var deserializer = new DeserializerBuilder()
                 .WithNamingConvention(PascalCaseNamingConvention.Instance)
                 .Build();
