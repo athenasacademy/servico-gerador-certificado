@@ -5,17 +5,26 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using AthenasAcademy.GeradorCertificado.Models;
 using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
+using PdfSharp.Charting;
 using System;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization;
+using System.IO;
+using System.Web.Hosting;
 
 namespace AthenasAcademy.GeradorCertificado.Repositories
 {
     public class AwsS3Repository : IAwsS3Repository
     {
+
         #region Dependencias
-        private const string ACCESS_KEY = "AKIAS2MQFVFOCOZNQYVH";
-        private const string SECRET_KEY = "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";
-        private const string BUCKET_BASE = "academy-academy";
+
+        private static SecretConfig credenciais = ObterSecrets();
+        private static string ACCESS_KEY = credenciais.AwsAccessKey;
+        private static string SECRET_KEY = credenciais.AwsSecretKey;
+        private static string BUCKET_BASE = credenciais.AwsBucketBase;
+
         private static AwsS3Repository instancia;
         #endregion
 
@@ -146,6 +155,21 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
             {
                 throw new Exception($"Erro geral ao criar o cliente Amazon S3: {ex.Message}");
             }
+        }
+        #endregion
+
+        #region ConfiguracaoSecrets
+        private static SecretConfig ObterSecrets()
+        {
+            var yamlPath = HostingEnvironment.MapPath(@"~/Config/secrets.yaml");
+
+            var yamlContent = File.ReadAllText(yamlPath);
+
+            var deserializer = new DeserializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .Build();
+
+            return deserializer.Deserialize<SecretConfig>(yamlContent);
         }
         #endregion
     }
