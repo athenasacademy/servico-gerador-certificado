@@ -5,13 +5,12 @@ using Amazon.S3.Model;
 using Amazon.S3.Transfer;
 using AthenasAcademy.GeradorCertificado.Models;
 using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
-using PdfSharp.Charting;
 using System;
-using System.Threading.Tasks;
-using YamlDotNet.Serialization.NamingConventions;
-using YamlDotNet.Serialization;
 using System.IO;
+using System.Threading.Tasks;
 using System.Web.Hosting;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace AthenasAcademy.GeradorCertificado.Repositories
 {

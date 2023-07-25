@@ -91,6 +91,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions\APICustomException.cs" />
     <Compile Include="Models\GerarNovoCertificadoModel.cs" />
     <Compile Include="Models\PDFDetalhesModel.cs" />
     <Compile Include="Models\PNGDetalhesModel.cs" />
@@ -105,8 +106,10 @@
     <Compile Include="Services\Interfaces\IGerenciadorArquivosService.cs" />
     <Compile Include="Services\Interfaces\IPNGService.cs" />
     <Compile Include="Services\Interfaces\IQRCodeService.cs" />
+    <Compile Include="Services\ITokenService.cs" />
     <Compile Include="Services\PNGService.cs" />
     <Compile Include="Services\QRCodeService.cs" />
+    <Compile Include="Services\TokenService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

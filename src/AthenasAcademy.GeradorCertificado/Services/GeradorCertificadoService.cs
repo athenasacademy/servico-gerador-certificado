@@ -95,7 +95,8 @@ namespace AthenasAcademy.GeradorCertificado.Services
             }
             catch (Exception ex)
             {
-                throw new Exception(string.Format("Não foi possível gerar o certificado nesse momento. {0}", ex.Message));
+                Console.Write(string.Format("Não foi possível gerar o certificado nesse momento. {0}", ex.Message));
+                return null;
             }
         }
         #endregion
