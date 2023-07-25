@@ -145,6 +145,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 using (FileStream fs = new FileStream(caminhoArquivo, FileMode.Create))
                 {
                     novaImagem.Save(fs, ImageFormat.Png);
+                    fs.Close();
                 }
             }
             catch (Exception ex)
@@ -160,6 +161,7 @@ namespace AthenasAcademy.GeradorCertificado.Services
                 using (MemoryStream stream = new MemoryStream())
                 {
                     bitmap.Save(stream, ImageFormat.Png);
+                    stream.Close();
                     return stream.ToArray();
                 }
             }

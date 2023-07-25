@@ -3,6 +3,7 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Amazon.Util;
 using AthenasAcademy.GeradorCertificado.Models;
 using AthenasAcademy.GeradorCertificado.Repositories.Interfaces;
 using System;
@@ -107,19 +108,18 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
         {
             try
             {
-                RegionEndpoint regionEndpoint = RegionEndpoint.USWest2;
-
                 using (AmazonS3Client client = GetClient())
                 {
                     GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
                     {
-                        BucketName = BUCKET_BASE + "@/" + bucket,
-                        Key = objeto,
-                        Expires = DateTime.UtcNow.AddHours(1)
+                        BucketName = BUCKET_BASE,
+                        Key = string.Format("{0}/{1}", bucket, objeto),
+                        Expires = DateTime.UtcNow.AddHours(1),
+                        Verb = HttpVerb.GET
                     };
-
                     return await Task.FromResult(client.GetPreSignedURL(request));
                 }
+
             }
             catch (AmazonS3Exception ex)
             {
@@ -131,6 +131,7 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
             }
         }
         #endregion
+
 
         #region Métodos Privados
         private AmazonS3Client GetClient()

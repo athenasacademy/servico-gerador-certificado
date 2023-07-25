@@ -49,7 +49,18 @@ namespace AthenasAcademy.GeradorCertificado.Services
 
                 foreach (string arquivo in arquivos)
                 {
-                    File.Delete(arquivo);
+                    try
+                    {
+                        using (var stream = new FileStream(arquivo, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                        {
+                            File.Delete(arquivo);
+                            Console.WriteLine($"Arquivo {arquivo} excluído com sucesso.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Erro ao excluir o arquivo {arquivo}: {ex.Message}");
+                    }
                 }
             }
             catch (Exception ex)
