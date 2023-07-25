@@ -132,7 +132,6 @@ namespace AthenasAcademy.GeradorCertificado.Repositories
         }
         #endregion
 
-
         #region Métodos Privados
         private AmazonS3Client GetClient()
         {

@@ -6,17 +6,29 @@ using System.Web.Http;
 
 namespace AthenasAcademy.GeradorCertificado.API.Controllers
 {
+    /// <summary>
+    /// Controlador responsável pelas operações relacionadas a certificados.
+    /// </summary>
     public class CertificadoController : ApiController
     {
         private readonly IGeradorCertificadoService _certificadoService;
         private readonly ITokenService _tokenService;
 
+        /// <summary>
+        /// Cria uma nova instância do controlador CertificadoController.
+        /// </summary>
         public CertificadoController()
         {
             _certificadoService = GeradorCertificadoService.Instancia;
             _tokenService = TokenService.Instancia;
         }
 
+        /// <summary>
+        /// Gera um novo certificado com base nas informações fornecidas.
+        /// </summary>
+        /// <param name="request">Objeto contendo as informações necessárias para gerar o certificado.</param>
+        /// <param name="token">Token de autenticação.</param>
+        /// <returns>Uma ação HTTP que representa o resultado da operação.</returns>
         [HttpPost]
         [Route("gerar-certificado")]
         public async Task<IHttpActionResult> Gerar([FromBody] NovoCertificadoRequest request, [FromUri] string token)
